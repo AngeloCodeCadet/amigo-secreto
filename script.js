@@ -106,20 +106,93 @@ async function doDraw() {
   }
 }
 function renderShareCards(cards) {
-  const holder = $("shareList"); holder.innerHTML = "";
+  const holder = $("shareList");
+  holder.innerHTML = "";
+
   cards.forEach(card => {
-    const box = document.createElement("div"); box.className = "share-card";
-    const top = document.createElement("div"); top.className = "share-top";
-    const name = document.createElement("strong"); name.textContent = card.person;
-    const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = "Resultado individual";
+    const box = document.createElement("div");
+    box.className = "share-card";
+
+    const top = document.createElement("div");
+    top.className = "share-top";
+
+    const name = document.createElement("strong");
+    name.textContent = card.person;
+
+    const tag = document.createElement("span");
+    tag.className = "tag";
+    tag.textContent = "Resultado individual";
+
     top.append(name, tag);
-    const url = document.createElement("div"); url.className = "share-url"; url.textContent = card.url;
-    const row = document.createElement("div"); row.className = "share-code";
-    const codeLabel = document.createElement("span"); codeLabel.textContent = "Código de acesso";
-    const code = document.createElement("b"); code.textContent = card.code;
-    const copy = document.createElement("button"); copy.className = "mini-copy"; copy.type = "button"; copy.textContent = "Copiar";
-    copy.addEventListener("click", async () => { await navigator.clipboard.writeText(`Link: ${card.url}\nCódigo: ${card.code}`); copy.textContent = "Copiado ✓"; });
-    row.append(codeLabel, code, copy); box.append(top, url, row); holder.append(box);
+
+    const url = document.createElement("div");
+    url.className = "share-url";
+    url.textContent = card.url;
+
+    const row = document.createElement("div");
+    row.className = "share-code";
+
+    const codeLabel = document.createElement("span");
+    codeLabel.textContent = "Código de acesso";
+
+    const code = document.createElement("b");
+    code.textContent = card.code;
+
+    row.append(codeLabel, code);
+
+    // Botão para copiar apenas o código
+    const copyCode = document.createElement("button");
+    copyCode.className = "mini-copy";
+    copyCode.type = "button";
+    copyCode.textContent = "Copiar código";
+
+    copyCode.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(card.code);
+        copyCode.textContent = "Copiado ✓";
+      } catch {
+        copyCode.textContent = "Erro ao copiar";
+      }
+    });
+
+    // Mensagem pronta para WhatsApp
+    const copyMessage = document.createElement("button");
+    copyMessage.className = "mini-copy";
+    copyMessage.type = "button";
+    copyMessage.textContent = "Copiar mensagem";
+
+    copyMessage.addEventListener("click", async () => {
+
+      const message =
+`Olá, ${card.person}! 🎁
+
+Aqui está o teu resultado do Amigo Secreto:
+
+${card.url}
+
+Código de acesso: ${card.code}
+
+Abre o link e cola o código para descobrires quem te calhou.
+
+Não partilhes esta mensagem!
+
+Boas festas! 🎄`;
+
+      try {
+        await navigator.clipboard.writeText(message);
+        copyMessage.textContent = "Mensagem copiada ✓";
+      } catch {
+        copyMessage.textContent = "Erro ao copiar";
+      }
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "card-actions";
+
+    actions.append(copyCode, copyMessage);
+
+    box.append(top, url, row, actions);
+    holder.append(box);
   });
 }
 async function copyAll() {

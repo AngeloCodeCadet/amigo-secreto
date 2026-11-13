@@ -68,7 +68,15 @@
       <h2 id="revealEvent" class="center">Amigo Secreto</h2>
       <p class="center muted">Introduz o código que recebeste do organizador para descobrir a quem vais oferecer um presente.</p>
       <label for="accessCode">O teu código secreto</label>
-      <input id="accessCode" class="code-input" maxlength="16" autocomplete="one-time-code" placeholder="Introduz o código">
+      <input
+    id="accessCode"
+    class="code-input"
+    type="text"
+    maxlength="16"
+    autocomplete="off"
+    autocapitalize="characters"
+    spellcheck="false"
+    placeholder="Cola ou escreve o código">
       <div id="revealError" class="message error" role="alert" hidden></div>
       <button id="revealBtn" class="button button-gold full" type="button">Revelar o meu amigo secreto</button>
       <div id="revealResult" class="reveal-result" hidden>
