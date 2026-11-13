@@ -38,6 +38,32 @@
       </div>
       <ul id="participantList" class="participant-list" aria-live="polite"></ul>
       <div id="participantCount" class="count">Ainda não adicionaste participantes.</div>
+      <div class="divider"></div>
+
+<div class="section-heading compact">
+    <span class="step">03</span>
+    <div>
+        <h2>Restrições do sorteio</h2>
+        <p>Define quem não pode calhar a quem.</p>
+    </div>
+</div>
+
+<label for="restrictionGiver">Este participante</label>
+<select id="restrictionGiver">
+    <option value="">Escolhe quem dá</option>
+</select>
+
+<label for="restrictionRecipient">Não pode tirar esta pessoa</label>
+<select id="restrictionRecipient">
+    <option value="">Escolhe quem não pode receber</option>
+</select>
+
+<button id="addRestrictionBtn" class="button button-outline full"
+        type="button" disabled>
+    ＋ Adicionar restrição
+</button>
+
+<ul id="restrictionList" class="participant-list"></ul>
       <div id="setupError" class="message error" role="alert" hidden></div>
       <button id="drawBtn" class="button button-gold full" type="button" disabled>🎁 Fazer o sorteio</button>
       <p class="small-note">O sorteio é feito neste dispositivo. Os nomes não são enviados para nenhum servidor.</p>
