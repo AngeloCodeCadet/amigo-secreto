@@ -299,6 +299,21 @@ function renderShareCards(cards) {
 
     row.append(codeLabel, code);
 
+    // Mensagem de partilha
+    const message =
+`🎅 Olá, ${card.person}!
+
+Pronto para descobrir quem é o teu Amigo Secreto? 🎁
+
+🔗 Abre este link:
+${card.url}
+
+🔐 O teu código de acesso é: ${card.code}
+
+🤫 Não partilhes o teu resultado com ninguém!
+
+Boas festas! 🎄`;
+
     // Botão para copiar apenas o código
     const copyCode = document.createElement("button");
     copyCode.className = "mini-copy";
@@ -314,29 +329,13 @@ function renderShareCards(cards) {
       }
     });
 
-    // Mensagem pronta para WhatsApp
+    // Botão para copiar mensagem
     const copyMessage = document.createElement("button");
     copyMessage.className = "mini-copy";
     copyMessage.type = "button";
     copyMessage.textContent = "Copiar mensagem";
 
     copyMessage.addEventListener("click", async () => {
-
-      const message =
-`Olá, ${card.person}! 🎁
-
-Aqui está o teu resultado do Amigo Secreto:
-
-${card.url}
-
-Código de acesso: ${card.code}
-
-Abre o link e cola o código para descobrires quem te calhou.
-
-Não partilhes esta mensagem!
-
-Boas festas! 🎄`;
-
       try {
         await navigator.clipboard.writeText(message);
         copyMessage.textContent = "Mensagem copiada ✓";
@@ -345,10 +344,23 @@ Boas festas! 🎄`;
       }
     });
 
+    // Botão para enviar pelo WhatsApp
+    const whatsapp = document.createElement("button");
+    whatsapp.className = "mini-copy whatsapp-button";
+    whatsapp.type = "button";
+    whatsapp.textContent = "Enviar pelo WhatsApp";
+
+    whatsapp.addEventListener("click", () => {
+      const whatsappUrl =
+        "https://wa.me/?text=" + encodeURIComponent(message);
+
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+    });
+
     const actions = document.createElement("div");
     actions.className = "card-actions";
 
-    actions.append(copyCode, copyMessage);
+    actions.append(copyCode, copyMessage, whatsapp);
 
     box.append(top, url, row, actions);
     holder.append(box);
