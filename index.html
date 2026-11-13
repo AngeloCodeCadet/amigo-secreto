@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#123b30">
+  <title>Amigo Secreto de Natal</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="snow snow-one">✦</div><div class="snow snow-two">❄</div><div class="snow snow-three">✧</div>
+  <main class="shell">
+    <header class="hero">
+      <div class="topline"><span>✦ NATAL EM BOA COMPANHIA ✦</span></div>
+      <div class="ornament">🎄</div>
+      <h1>Amigo <em>Secreto</em></h1>
+      <p class="subtitle">Um presente, uma surpresa e muita magia.</p>
+      <div class="garland">✧ ─────────── ❄ ─────────── ✧</div>
+    </header>
+
+    <section id="setupPanel" class="panel">
+      <div class="section-heading">
+        <span class="step">01</span>
+        <div><h2>Preparar o sorteio</h2><p>Define os detalhes e acrescenta os participantes.</p></div>
+      </div>
+      <label for="eventName">Nome do evento</label>
+      <input id="eventName" maxlength="60" value="Amigo Secreto de Natal" placeholder="Ex.: Natal 2026">
+      <label for="budget">Orçamento por presente (€) <span class="optional">opcional</span></label>
+      <input id="budget" type="number" min="0" step="0.01" placeholder="Ex.: 15">
+      <div class="divider"></div>
+      <div class="section-heading compact">
+        <span class="step">02</span>
+        <div><h2>Participantes</h2><p>Adiciona pelo menos 3 pessoas.</p></div>
+      </div>
+      <div class="add-row">
+        <input id="personName" maxlength="50" placeholder="Nome do participante" autocomplete="off">
+        <button id="addBtn" class="button button-red" type="button">Adicionar <span>＋</span></button>
+      </div>
+      <ul id="participantList" class="participant-list" aria-live="polite"></ul>
+      <div id="participantCount" class="count">Ainda não adicionaste participantes.</div>
+      <div id="setupError" class="message error" role="alert" hidden></div>
+      <button id="drawBtn" class="button button-gold full" type="button" disabled>🎁 Fazer o sorteio</button>
+      <p class="small-note">O sorteio é feito neste dispositivo. Os nomes não são enviados para nenhum servidor.</p>
+    </section>
+
+    <section id="resultsPanel" class="panel" hidden>
+      <div class="success-mark">✓</div>
+      <h2 class="center">Sorteio realizado!</h2>
+      <p class="center muted">Os resultados estão protegidos por códigos individuais. Não são apresentados nesta página.</p>
+      <div class="event-summary">
+        <div><span>Evento</span><strong id="summaryEvent"></strong></div>
+        <div><span>Orçamento</span><strong id="summaryBudget"></strong></div>
+        <div><span>Participantes</span><strong id="summaryCount"></strong></div>
+      </div>
+      <h3>Entregar os resultados</h3>
+      <p class="muted small">Cada pessoa precisa de receber o seu link e o respetivo código. Envia-os em privado — idealmente por canais separados.</p>
+      <div id="shareList" class="share-list"></div>
+      <div class="actions">
+        <button id="copyAllBtn" class="button button-green" type="button">Copiar lista de links e códigos</button>
+        <button id="newDrawBtn" class="button button-outline" type="button">Criar outro sorteio</button>
+      </div>
+      <div class="notice"><strong>Nota sobre a privacidade:</strong> a aplicação não mostra as atribuições ao organizador. No entanto, por funcionar sem servidor, quem tiver acesso simultâneo aos links e aos códigos poderá tecnicamente consultar os resultados. Para maior privacidade, distribui os códigos diretamente aos participantes e não guardes uma cópia conjunta.</div>
+    </section>
+
+    <section id="revealPanel" class="panel reveal-panel" hidden>
+      <div class="ornament small-ornament">🎁</div>
+      <div class="topline">UMA SURPRESA ESPECIAL PARA TI</div>
+      <h2 id="revealEvent" class="center">Amigo Secreto</h2>
+      <p class="center muted">Introduz o código que recebeste do organizador para descobrir a quem vais oferecer um presente.</p>
+      <label for="accessCode">O teu código secreto</label>
+      <input id="accessCode" class="code-input" maxlength="16" autocomplete="one-time-code" placeholder="Introduz o código">
+      <div id="revealError" class="message error" role="alert" hidden></div>
+      <button id="revealBtn" class="button button-gold full" type="button">Revelar o meu amigo secreto</button>
+      <div id="revealResult" class="reveal-result" hidden>
+        <p>Este Natal vais oferecer um presente a…</p>
+        <div id="recipientName" class="recipient"></div>
+        <p class="muted small" id="revealBudget"></p>
+        <p class="festive-end">🎄 Boas festas e boas surpresas! 🎄</p>
+      </div>
+    </section>
+
+    <footer>Feito com ❤️ e espírito de Natal <span>•</span> Aplicação gratuita</footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
