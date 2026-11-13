@@ -1,5 +1,9 @@
 const $ = (id) => document.getElementById(id);
-const state = { people: [], draw: null };
+const state = {
+    people: [],
+    restrictions: [],
+    draw: null
+};
 
 function showMessage(id, message) {
   const el = $(id); el.textContent = message; el.hidden = !message;
@@ -14,13 +18,105 @@ function renderPeople() {
     const remove = document.createElement("button");
     remove.className = "remove"; remove.type = "button"; remove.textContent = "×";
     remove.setAttribute("aria-label", `Remover ${name}`);
-    remove.addEventListener("click", () => { state.people.splice(index, 1); renderPeople(); });
+    remove.addEventListener("click", () => {
+    state.people.splice(index, 1);
+
+    state.restrictions = state.restrictions.filter(
+        restriction =>
+            restriction.giver !== name &&
+            restriction.recipient !== name
+    );
+
+    renderPeople();
+});
     li.append(label, remove); list.append(li);
   });
   $("participantCount").textContent = state.people.length === 0
     ? "Ainda não adicionaste participantes."
     : `${state.people.length} participante${state.people.length === 1 ? "" : "s"} adicionado${state.people.length === 1 ? "" : "s"}.`;
   $("drawBtn").disabled = state.people.length < 3;
+  renderRestrictionControls();
+  renderRestrictions();
+}
+function renderRestrictionControls() {
+    const giver = $("restrictionGiver");
+    const recipient = $("restrictionRecipient");
+
+    const previousGiver = giver.value;
+    const previousRecipient = recipient.value;
+
+    giver.innerHTML = '<option value="">Escolhe quem dá</option>';
+    recipient.innerHTML = '<option value="">Escolhe quem não pode receber</option>';
+
+    state.people.forEach(person => {
+        const optionGiver = document.createElement("option");
+        optionGiver.value = person;
+        optionGiver.textContent = person;
+        giver.appendChild(optionGiver);
+
+        const optionRecipient = document.createElement("option");
+        optionRecipient.value = person;
+        optionRecipient.textContent = person;
+        recipient.appendChild(optionRecipient);
+    });
+
+    giver.disabled = state.people.length < 2;
+    recipient.disabled = state.people.length < 2;
+    $("addRestrictionBtn").disabled = state.people.length < 2;
+
+    if (state.people.includes(previousGiver)) giver.value = previousGiver;
+    if (state.people.includes(previousRecipient)) recipient.value = previousRecipient;
+}
+
+function renderRestrictions() {
+    const list = $("restrictionList");
+    list.innerHTML = "";
+
+    state.restrictions.forEach((restriction, index) => {
+        const li = document.createElement("li");
+
+        const description = document.createElement("span");
+        description.textContent =
+            `${restriction.giver} não pode tirar ${restriction.recipient}`;
+
+        const removeButton = document.createElement("button");
+        removeButton.type = "button";
+        removeButton.textContent = "Remover";
+        removeButton.addEventListener("click", () => {
+            state.restrictions.splice(index, 1);
+            renderRestrictions();
+        });
+
+        li.appendChild(description);
+        li.appendChild(removeButton);
+        list.appendChild(li);
+    });
+}
+function addRestriction() {
+    const giver = $("restrictionGiver").value;
+    const recipient = $("restrictionRecipient").value;
+
+    showMessage("setupError", "");
+
+    if (!giver || !recipient) {
+        showMessage("setupError", "Seleciona os dois participantes.");
+        return;
+    }
+
+    if (giver === recipient) {
+        showMessage("setupError", "Um participante não pode ser impedido de tirar a si próprio.");
+        return;
+    }
+
+    if (state.restrictions.some(r =>
+        r.giver === giver && r.recipient === recipient
+    )) {
+        showMessage("setupError", "Essa restrição já existe.");
+        return;
+    }
+
+    state.restrictions.push({ giver, recipient });
+    renderRestrictions();
 }
 function addPerson() {
   const name = normaliseName($("personName").value);
@@ -38,6 +134,63 @@ function secureShuffle(items) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+function createValidAssignments() {
+    const forbidden = new Map(
+        state.people.map(person => [
+            person,
+            new Set(
+                state.restrictions
+                    .filter(r => r.giver === person)
+                    .map(r => r.recipient)
+            )
+        ])
+    );
+
+    const givers = secureShuffle(state.people);
+    const recipients = secureShuffle(state.people);
+
+    const assigned = new Map();
+    const used = new Set();
+
+    function search(index) {
+        if (index === givers.length) {
+            return true;
+        }
+
+        const giver = givers[index];
+
+        const candidates = secureShuffle(
+            recipients.filter(recipient =>
+                !used.has(recipient) &&
+                recipient !== giver &&
+                !forbidden.get(giver).has(recipient)
+            )
+        );
+
+        for (const recipient of candidates) {
+            assigned.set(giver, recipient);
+            used.add(recipient);
+
+            if (search(index + 1)) {
+                return true;
+            }
+
+            assigned.delete(giver);
+            used.delete(recipient);
+        }
+
+        return false;
+    }
+
+    if (!search(0)) {
+        return null;
+    }
+
+    return state.people.map(person => ({
+        person,
+        recipient: assigned.get(person)
+    }));
 }
 function randomCode() {
   const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -75,9 +228,15 @@ async function doDraw() {
   if (!window.crypto || !crypto.subtle) {
     return showMessage("setupError", "O teu navegador não permite a encriptação necessária. Abre a aplicação através de HTTPS (por exemplo, GitHub Pages) ou num navegador actualizado.");
   }
-  const shuffled = secureShuffle(state.people);
-  // A cyclic shift guarantees that nobody is assigned to themselves.
-  const assignments = state.people.map((person, i) => ({person, recipient: shuffled[(shuffled.indexOf(person) + 1) % shuffled.length]}));
+  const assignments = createValidAssignments();
+
+if (!assignments) {
+    showMessage(
+        "setupError",
+        "Não existe uma combinação possível com estas restrições. Remove uma ou mais restrições e tenta novamente."
+    );
+    return;
+}
   const event = $("eventName").value.trim() || "Amigo Secreto";
   const budgetValue = $("budget").value.trim();
   const budget = budgetValue ? Number(budgetValue) : null;
@@ -233,7 +392,7 @@ async function reveal() {
   }
 }
 function resetApp() {
-  state.people = []; state.draw = null;
+  state.people = []; state.restrictions = [];
   $("resultsPanel").hidden = true; $("setupPanel").hidden = false;
   $("personName").value = ""; $("budget").value = ""; $("eventName").value = "Amigo Secreto de Natal";
   renderPeople(); window.scrollTo({top:0, behavior:"smooth"});
@@ -241,6 +400,7 @@ function resetApp() {
 $("addBtn").addEventListener("click", addPerson);
 $("personName").addEventListener("keydown", e => { if (e.key === "Enter") addPerson(); });
 $("drawBtn").addEventListener("click", doDraw);
+$("addRestrictionBtn").addEventListener("click", addRestriction);
 $("copyAllBtn").addEventListener("click", copyAll);
 $("newDrawBtn").addEventListener("click", resetApp);
 $("revealBtn").addEventListener("click", reveal);
